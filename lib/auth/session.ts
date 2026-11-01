@@ -3,10 +3,8 @@ import { cookies } from "next/headers";
 import { db, users } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import type { User } from "@/lib/db/schema";
+import { getJwtSecret, JWT_ALGORITHM } from "./secret";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "learn-ai-super-secure-jwt-secret-key-2025"
-);
 const COOKIE_NAME = "auth_token";
 
 export interface SessionPayload {
@@ -18,15 +16,17 @@ export interface SessionPayload {
 
 export async function signToken(payload: SessionPayload): Promise<string> {
   return new SignJWT({ ...payload })
-    .setProtectedHeader({ alg: "HS256" })
+    .setProtectedHeader({ alg: JWT_ALGORITHM })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(JWT_SECRET);
+    .sign(getJwtSecret());
 }
 
 export async function verifyToken(token: string): Promise<SessionPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getJwtSecret(), {
+      algorithms: [JWT_ALGORITHM],
+    });
     return {
       userId: payload.userId as number,
       username: payload.username as string,

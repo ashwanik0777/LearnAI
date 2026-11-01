@@ -9,6 +9,15 @@ export async function POST(req: NextRequest) {
   }
 
   const { id } = await req.json();
-  const updated = await storage.markNotificationAsRead(parseInt(id));
-  return NextResponse.json(updated || { success: true });
+  const notificationId = parseInt(id);
+  if (isNaN(notificationId)) {
+    return NextResponse.json({ message: "Invalid notification ID" }, { status: 400 });
+  }
+
+  // Scoped to the current user so one account can't read or modify another's notifications
+  const updated = await storage.markNotificationAsRead(notificationId, user.id);
+  if (!updated) {
+    return NextResponse.json({ message: "Notification not found" }, { status: 404 });
+  }
+  return NextResponse.json(updated);
 }

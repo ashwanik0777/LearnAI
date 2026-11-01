@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/context/AuthContext";
 
 const navItems = [
   { label: "Dashboard", icon: Home, href: "/admin" },
@@ -25,6 +26,13 @@ export default function AdminLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const pathname = usePathname();
+  const { user, logout } = useAuth();
+  const initials = (user?.fullName || "Admin")
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   if (pathname === "/admin/login") {
     return <>{children}</>;
@@ -93,15 +101,16 @@ export default function AdminLayout({
             <ExternalLink className="h-4 w-4 shrink-0" />
             {sidebarOpen && <span className="ml-3 truncate">Student Platform</span>}
           </Link>
-          <Link
-            href="/login"
-            className={`flex items-center px-3.5 py-2 rounded-xl text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 transition-colors ${
+          <button
+            type="button"
+            onClick={logout}
+            className={`w-full flex items-center px-3.5 py-2 rounded-xl text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-950/30 transition-colors ${
               sidebarOpen ? "" : "justify-center"
             }`}
           >
             <LogOut className="h-4 w-4 shrink-0" />
             {sidebarOpen && <span className="ml-3 truncate">Sign Out</span>}
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -119,11 +128,14 @@ export default function AdminLayout({
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3 pl-4 border-l border-slate-800">
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-amber-400 flex items-center justify-center text-xs font-bold text-white shadow-md">
-                AD
+                {initials}
               </div>
               <div className="hidden md:block text-left text-xs">
-                <div className="font-semibold text-white">Administrator</div>
-                <div className="text-slate-400">admin@learnai.example</div>
+                <div className="font-semibold text-white">
+                  {user?.fullName || "Administrator"}
+                  {user?.role && <span className="ml-1.5 text-[10px] uppercase text-amber-400">{user.role}</span>}
+                </div>
+                <div className="text-slate-400">{user?.email}</div>
               </div>
             </div>
           </div>

@@ -32,8 +32,6 @@ interface QuizQuestion {
   questionText: string;
   questionType: string;
   options: QuizOption[];
-  correctAnswer: string;
-  explanation?: string | null;
   order?: number | null;
   points?: number | null;
 }
@@ -51,6 +49,8 @@ interface QuizResults {
       questionId: number;
       answer: string;
       correct: boolean;
+      correctAnswer: string;
+      explanation?: string | null;
     }>;
   };
 }
@@ -271,6 +271,8 @@ export default function QuizDetailPage() {
             const userAnswer = selectedAnswers[questionId];
             const gradedAnswer = gradedAnswers.find((a) => a.questionId === questionId);
             const isCorrect = gradedAnswer?.correct || false;
+            const correctAnswer = gradedAnswer?.correctAnswer;
+            const explanation = gradedAnswer?.explanation;
             
             return (
               <Card key={questionId} className={`border-l-4 ${isCorrect ? 'border-l-green-500' : 'border-l-red-500'}`}>
@@ -297,9 +299,9 @@ export default function QuizDetailPage() {
                         <div 
                           key={option.id} 
                           className={`flex items-center space-x-2 p-2 rounded-md text-sm ${
-                            option.id === question.correctAnswer 
+                            option.id === correctAnswer 
                               ? 'bg-green-50 border border-green-200' 
-                              : option.id === userAnswer && option.id !== question.correctAnswer
+                              : option.id === userAnswer && option.id !== correctAnswer
                               ? 'bg-red-50 border border-red-200'
                               : ''
                           }`}
@@ -308,10 +310,10 @@ export default function QuizDetailPage() {
                           <Label htmlFor={`q${questionId}-${option.id}`} className="flex-1">
                             {option.text}
                           </Label>
-                          {option.id === question.correctAnswer && (
+                          {option.id === correctAnswer && (
                             <CheckCircle2 className="h-4 w-4 text-green-600" />
                           )}
-                          {option.id === userAnswer && option.id !== question.correctAnswer && (
+                          {option.id === userAnswer && option.id !== correctAnswer && (
                             <XCircle className="h-4 w-4 text-red-600" />
                           )}
                         </div>
@@ -319,10 +321,10 @@ export default function QuizDetailPage() {
                     </RadioGroup>
                   )}
                   
-                  {question.explanation && (
+                  {explanation && (
                     <div className="mt-4 p-3 bg-blue-50 rounded-md">
                       <p className="text-xs font-semibold text-blue-800">Explanation:</p>
-                      <p className="text-xs text-blue-700 mt-1">{question.explanation}</p>
+                      <p className="text-xs text-blue-700 mt-1">{explanation}</p>
                     </div>
                   )}
                 </CardContent>

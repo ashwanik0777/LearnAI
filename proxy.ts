@@ -1,9 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { jwtVerify } from "jose";
-
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "learn-ai-super-secure-jwt-secret-key-2025"
-);
+import { getJwtSecret, JWT_ALGORITHM } from "@/lib/auth/secret";
 
 const PROTECTED_PREFIXES = [
   "/dashboard",
@@ -27,24 +24,36 @@ export async function proxy(req: NextRequest) {
   let session: any = null;
   if (token) {
     try {
-      const { payload } = await jwtVerify(token, JWT_SECRET);
+      const { payload } = await jwtVerify(token, getJwtSecret(), {
+        algorithms: [JWT_ALGORITHM],
+      });
       session = payload;
     } catch {
       session = null;
     }
   }
 
-  // Auth pages redirect to dashboard if logged in
+  const isStaff = session?.role === "admin" || session?.role === "subadmin";
+
+  // Auth pages redirect to the right dashboard if logged in
   if (session && (pathname === "/login" || pathname === "/register")) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return NextResponse.redirect(new URL(isStaff ? "/admin" : "/dashboard", req.url));
+  }
+
+  // Admin login page is public; staff who are already signed in skip it
+  if (pathname === "/admin/login") {
+    if (isStaff) {
+      return NextResponse.redirect(new URL("/admin", req.url));
+    }
+    return NextResponse.next();
   }
 
   // Check admin route protection
-  if (pathname.startsWith("/admin")) {
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     if (!session) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      return NextResponse.redirect(new URL("/admin/login", req.url));
     }
-    if (session.role !== "admin" && session.role !== "subadmin") {
+    if (!isStaff) {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
   }
@@ -72,6 +81,7 @@ export const config = {
     "/profile/:path*",
     "/settings/:path*",
     "/help/:path*",
+    "/admin",
     "/admin/:path*",
     "/login",
     "/register",

@@ -52,7 +52,7 @@ const profileSchema = z.object({
   graduationYear: z.number().optional().nullable(),
   currentGrade: z.string().optional().nullable(),
   specializationOrMajor: z.string().optional().nullable(),
-  showOnlyRelevantContent: z.boolean().default(true),
+  showOnlyRelevantContent: z.boolean(),
   interests: z.array(z.string()).optional().nullable(),
   goals: z.array(z.string()).optional().nullable(),
   strengths: z.array(z.string()).optional().nullable(),

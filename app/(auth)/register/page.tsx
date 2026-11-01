@@ -56,7 +56,7 @@ const registerSchema = z.object({
     "graduate", 
     "postgraduate"
   ], {
-    required_error: "Please select your academic level",
+    error: "Please select your academic level",
   }),
 });
 

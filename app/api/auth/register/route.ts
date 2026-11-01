@@ -1,19 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import { storage } from "@/lib/db/storage";
 import { signToken, setAuthCookie } from "@/lib/auth/session";
+import { getClientIp, rateLimit } from "@/lib/auth/rate-limit";
 import bcrypt from "bcryptjs";
+import { z } from "zod";
+
+const registerSchema = z.object({
+  username: z.string().trim().regex(/^[a-zA-Z0-9_.-]{3,32}$/, "Username must be 3-32 characters (letters, numbers, _ . -)"),
+  password: z.string().min(6, "Password must be at least 6 characters").max(128),
+  email: z.string().trim().pipe(z.email("Please enter a valid email address")),
+  fullName: z.string().trim().min(2).max(100),
+  academicLevel: z.string().trim().min(1).max(50),
+});
 
 export async function POST(req: NextRequest) {
   try {
-    const data = await req.json();
-    const { username, password, email, fullName, academicLevel } = data;
-
-    if (!username || !password || !email || !fullName || !academicLevel) {
+    if (!rateLimit(`register:ip:${getClientIp(req)}`, 10, 60 * 60 * 1000)) {
       return NextResponse.json(
-        { message: "All required registration fields must be provided" },
+        { message: "Too many registration attempts. Please try again later." },
+        { status: 429 }
+      );
+    }
+
+    const parsed = registerSchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json(
+        { message: parsed.error.issues[0]?.message || "All required registration fields must be provided" },
         { status: 400 }
       );
     }
+    const { username, password, email, fullName, academicLevel } = parsed.data;
 
     const existingUsername = await storage.getUserByUsername(username);
     if (existingUsername) {
@@ -68,10 +84,10 @@ export async function POST(req: NextRequest) {
 
     const { password: _, ...userWithoutPassword } = user;
     return NextResponse.json(userWithoutPassword);
-  } catch (error: any) {
+  } catch (error) {
     console.error("Registration error:", error);
     return NextResponse.json(
-      { message: error.message || "Failed to register" },
+      { message: "Failed to register" },
       { status: 500 }
     );
   }

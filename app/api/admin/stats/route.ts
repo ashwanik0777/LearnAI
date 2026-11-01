@@ -2,8 +2,14 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { users, courses, subjects, quizzes, quizAttempts } from "@/lib/db/schema";
 import { sql } from "drizzle-orm";
+import { getCurrentUser } from "@/lib/auth/session";
 
 export async function GET() {
+  const user = await getCurrentUser();
+  if (!user || (user.role !== "admin" && user.role !== "subadmin")) {
+    return NextResponse.json({ message: "Admin access required" }, { status: 403 });
+  }
+
   try {
     let userCount = 0;
     let courseCount = 0;

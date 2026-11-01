@@ -471,8 +471,10 @@ export class Storage {
     return n;
   }
 
-  async markNotificationAsRead(id: number): Promise<schema.Notification | undefined> {
-    const [n] = await db.update(schema.notifications).set({ read: true }).where(eq(schema.notifications.id, id)).returning();
+  async markNotificationAsRead(id: number, userId: number): Promise<schema.Notification | undefined> {
+    const [n] = await db.update(schema.notifications).set({ read: true })
+      .where(and(eq(schema.notifications.id, id), eq(schema.notifications.userId, userId)))
+      .returning();
     return n;
   }
 

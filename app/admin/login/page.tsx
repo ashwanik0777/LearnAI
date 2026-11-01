@@ -1,27 +1,34 @@
 'use client';
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Shield, Lock, Mail, ArrowRight, AlertCircle, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("admin@learnai.example");
-  const [password, setPassword] = useState("••••••••");
+  const { login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Real authentication: login() verifies credentials server-side and routes
+  // admin/subadmin users to /admin (everyone else to /dashboard)
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await login({ username: email, password });
+    } catch (err: any) {
+      setError(err.message || "Invalid credentials");
+    } finally {
       setLoading(false);
-      router.push("/admin");
-    }, 600);
+    }
   };
 
   return (
@@ -49,11 +56,12 @@ export default function AdminLoginPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-xs text-slate-300">Staff Email or ID</Label>
+                <Label className="text-xs text-slate-300">Staff Email or Username</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
                   <Input 
-                    type="email"
+                    type="text"
+                    autoComplete="username"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -72,6 +80,7 @@ export default function AdminLoginPage() {
                   <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
                   <Input 
                     type="password"
+                    autoComplete="current-password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -80,6 +89,13 @@ export default function AdminLoginPage() {
                   />
                 </div>
               </div>
+
+              {error && (
+                <div className="flex items-start gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
+                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+              )}
 
               <Button 
                 type="submit" 

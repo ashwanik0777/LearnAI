@@ -25,6 +25,7 @@ CREATE TABLE users (
   email TEXT NOT NULL UNIQUE,
   full_name TEXT NOT NULL,
   academic_level TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'user',
   profile_completed BOOLEAN DEFAULT FALSE,
   avatar_url TEXT,
   dashboard_layout JSON,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { storage } from "@/lib/db/storage";
+import { pickNoteFields } from "@/lib/notes";
 
 export async function GET(
   _req: NextRequest,
@@ -36,7 +37,8 @@ export async function PUT(
     return NextResponse.json({ message: "Note not found" }, { status: 404 });
   }
 
-  const data = await req.json();
+  // Whitelist fields so a note can't be reassigned to another user via userId
+  const data = pickNoteFields(await req.json());
   const updated = await storage.updateNote(noteId, data);
   return NextResponse.json(updated);
 }

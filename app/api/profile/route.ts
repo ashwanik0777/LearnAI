@@ -19,10 +19,12 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    const data = await req.json();
+    // Never let the client choose which row/user this profile belongs to
+    const { id: _id, userId: _userId, updatedAt: _updatedAt, ...data } = await req.json();
     const updated = await storage.updateProfile(user.id, data);
     return NextResponse.json(updated);
-  } catch (error: any) {
-    return NextResponse.json({ message: error.message || "Failed to update profile" }, { status: 500 });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    return NextResponse.json({ message: "Failed to update profile" }, { status: 500 });
   }
 }
