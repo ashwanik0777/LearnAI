@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <!-- Solid Royal Academic Blue Squircle Background -->
+  <rect width="64" height="64" rx="16" fill="#2563eb" />
+  
+  <!-- Graduation Cap (Mortarboard Top) -->
+  <path d="M32 14L12 25L32 36L52 25L32 14Z" fill="#ffffff" />
+  
+  <!-- Graduation Cap (Base / Band) -->
+  <path d="M20 29.5V40C20 44 25.4 47.5 32 47.5C38.6 47.5 44 44 44 40V29.5L32 36L20 29.5Z" fill="#ffffff" fill-opacity="0.92" />
+  
+  <!-- Academic Amber Tassel -->
+  <path d="M50 26.5V38.5M50 38.5C50 39.5 49 41 47.5 41C46 41 45 39.5 45 38.5C45 37.5 46 36 47.5 36C49 36 50 37.5 50 38.5Z" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" fill="#f59e0b" />
+  
+  <!-- AI Sparkle / Star of Knowledge -->
+  <path d="M32 20L33.5 24.5L38 26L33.5 27.5L32 32L30.5 27.5L26 26L30.5 24.5L32 20Z" fill="#f59e0b" />
+</svg>
